@@ -12,4 +12,5 @@ public interface SteamApiWorkerInterface {
 
     void saveMatches();
 
+    void setMainSteamId(int steamId32);
 }

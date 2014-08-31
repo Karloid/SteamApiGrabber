@@ -14,6 +14,7 @@ public class TestDrive {
     private static final String PROP_NAME = "config.prop";
     public static final String KEY = "KEY";
     public static final String DOMAIN = "DOMAIN";
+    public static final String STEAMID_32 = "STEAMID32";
     private static Properties prop;
 
     public static void main(String[] args) {
@@ -27,6 +28,7 @@ public class TestDrive {
         worker.setModel(model);
         worker.setApiKey(prop.getProperty(KEY));
         worker.setDomainName(prop.getProperty(DOMAIN));
+        worker.setMainSteamId(Integer.valueOf(prop.getProperty(STEAMID_32)));
         worker.saveMatches();
     }
 
