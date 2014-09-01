@@ -10,7 +10,10 @@ public interface SteamApiWorkerInterface {
 
     void setDomainName(String property);
 
-    void saveMatches();
+    void saveAllMatchesByHero();
 
     void setMainSteamId(int steamId32);
+
+    void saveAllHeroes();
+
 }

@@ -15,6 +15,7 @@ public class TestDrive {
     public static final String KEY = "KEY";
     public static final String DOMAIN = "DOMAIN";
     public static final String STEAMID_32 = "STEAMID32";
+    public static final String DB_PATH = "dota2.db";
     private static Properties prop;
 
     public static void main(String[] args) {
@@ -24,12 +25,15 @@ public class TestDrive {
     private static void testGrabber() {
         loadProperties();
         SteamApiWorkerInterface worker = new SteamApiWorker();
-        Model model = new SQLiteModel();
+        Model model = new SQLiteModel(DB_PATH);
         worker.setModel(model);
         worker.setApiKey(prop.getProperty(KEY));
         worker.setDomainName(prop.getProperty(DOMAIN));
         worker.setMainSteamId(Integer.valueOf(prop.getProperty(STEAMID_32)));
-        worker.saveMatches();
+
+     //   worker.saveAllHeroes();
+
+        worker.saveAllMatchesByHero();
     }
 
     private static void loadProperties() {
