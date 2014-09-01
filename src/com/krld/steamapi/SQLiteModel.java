@@ -3,6 +3,7 @@ package com.krld.steamapi;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Andrey on 8/31/2014.
@@ -54,7 +55,55 @@ public class SQLiteModel implements Model {
         return heroesList;
     }
 
+    @Override
+    public void saveMatches(ArrayList<Map<String, Object>> matches) {
+        log("SAVE MATHES");
+        for (Map<String, Object> match : matches) {
+            try {
+                PreparedStatement prep = connection.prepareStatement("insert into matches (id, match_seq_num, start_time, lobby_type, radiant_team_id, dire_team_id) " +
+                        " values (?, ?, ?, ?, ?, ?);");
+                prep.setInt(1, anInt(match.get(JsonResponseFormat.MATCH_ID))); // insert into ID field
+                prep.setInt(2, anInt(match.get(JsonResponseFormat.MATCH_SEQ_NUM)));
+                prep.setInt(3, anInt(match.get(JsonResponseFormat.START_TIME)));
+                prep.setInt(4, anInt(match.get(JsonResponseFormat.LOBBY_TYPE)));
+                prep.setInt(5, anInt(match.get(JsonResponseFormat.RADIANT_TEAM_ID)));
+                prep.setInt(6, anInt(match.get(JsonResponseFormat.DIRE_TEAM_ID)));
+                prep.execute();
+                saveMatchPlayers(anInt(match.get(JsonResponseFormat.MATCH_ID)), (ArrayList<Map<String, Object>>) match.get(JsonResponseFormat.PLAYERS));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    private void saveMatchPlayers(int matchId, ArrayList<Map<String, Object>> players) throws SQLException {
+        for (Map<String, Object> playerInMatch : players) {
+            PreparedStatement prep = connection.prepareStatement("insert into players_in_matches (match_id, account_id, player_slot, hero_id) values (?, ?, ?, ?);");
+            savePlayer(anInt(playerInMatch.get(JsonResponseFormat.ACCOUNT_ID)));
+            prep.setInt(1, matchId);
+            prep.setInt(2, anInt(playerInMatch.get(JsonResponseFormat.ACCOUNT_ID)));
+            prep.setInt(3, anInt(playerInMatch.get(JsonResponseFormat.PLAYER_SLOT)));
+            prep.setInt(4, anInt(playerInMatch.get(JsonResponseFormat.HERO_ID)));
+            prep.execute();
+        }
+    }
+
+    private void savePlayer(int accountId) throws SQLException {
+        PreparedStatement prep = connection.prepareStatement("insert into players (account_id) values (?);");
+        prep.setInt(1, accountId);
+        prep.execute();
+    }
+
     private void log(String s) {
         System.out.println(">SQLiteModel: " + s);
+    }
+
+    private long anLong(Object value) {
+        return ((Double) value).longValue();
+    }
+
+    private int anInt(Object value) {
+        return ((Double) value).intValue();
     }
 }

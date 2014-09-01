@@ -66,7 +66,7 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
                 int resultsRemaining = 1;
                 int startAtMatchId = -1;
                 while (resultsRemaining > 0) {
-                    log("make request with " + START_AT_MATCH_ID + "=" + startAtMatchId);
+                    log("make request with " + START_AT_MATCH_ID + "=" + startAtMatchId + "&" + HERO_ID + "=" + heroId);
                     URI uri = getMatchHistoryUri(startAtMatchId, heroId);
                     HttpGet httpGet = new HttpGet(uri);
                     String result = makeRequest(httpGet);
@@ -89,10 +89,6 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
 
     }
 
-    private long anLong(Object value) {
-        return ((Double) value).longValue();
-    }
-
     private void sleep(int interval) {
         try {
             Thread.sleep(interval);
@@ -102,11 +98,15 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
     }
 
     private void parseAndSaveMatches(ArrayList<Map<String, Object>> matches) {
-
+        model.saveMatches(matches);
     }
 
-    private int anInt(Object integer) {
-        return ((Double) integer).intValue();
+    private long anLong(Object value) {
+        return ((Double) value).longValue();
+    }
+
+    private int anInt(Object value) {
+        return ((Double) value).intValue();
     }
 
     private URI getMatchHistoryUri(int startAtMatchId, int heroId) throws URISyntaxException {
