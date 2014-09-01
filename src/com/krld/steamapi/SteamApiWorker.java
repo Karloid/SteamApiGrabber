@@ -97,7 +97,9 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
                     resultsRemaining = anInt(root.get(RESULTS_REMAINING));
 
                     ArrayList<Map<String, Object>> matches = (ArrayList<Map<String, Object>>) root.get(MATCHES);
-                    startAtMatchId = anInt(matches.get(matches.size() - 1).get(JsonResponseFormat.MATCH_ID));
+                    if (matches.size() > 0) {
+                        startAtMatchId = anInt(matches.get(matches.size() - 1).get(JsonResponseFormat.MATCH_ID));
+                    }
                     sleep(INTERVAL_BETWEEN_REQUESTS);
                 }
             } catch (Exception e) {
@@ -193,11 +195,11 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
     }
 
     @Override
-    public void updatePlayersNames() {
+    public void updatePlayersInfo() {
         List<Player> allPlayers = model.getAllPlayers();
         List<Player> playersToRequest = new ArrayList<Player>();
         for (Player player : allPlayers) {
-            if (player.getPersonaname() == null ) {
+            if (player.getPersonaname() == null) {
                 playersToRequest.add(player);
                 if (playersToRequest.size() > MAX_PLAYERS_IN_DETAIL_REQUEST) {
                     updatePlayersNames(playersToRequest);

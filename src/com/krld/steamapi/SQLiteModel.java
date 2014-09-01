@@ -93,13 +93,38 @@ public class SQLiteModel implements Model {
     }
 
     @Override
-    public void updatePlayer(int id32, int communityVisibilityState, int profileState, String personaName, int lastLogoff, String profileurl, String avatar, String avatarmedium, String avatarfull, int personastate, String primaryclanid, int timecreated, int personastateflags) {
+    public void updatePlayer(int id32, int communityVisibilityState, int profileState, String personaName, int lastLogoff,
+                             String profileurl, String avatar, String avatarmedium, String avatarfull, int personastate,
+                             String primaryclanid, int timecreated, int personastateflags) {
         PreparedStatement prep = null;
         try {
-            prep = connection.prepareStatement("update players set persona_name = ? where account_id = ?");
+            prep = connection.prepareStatement("update players set persona_name = ?, " +
+                                                                  "community_visibility_state = ?," +
+                                                                  "profile_state = ?, " +
+                                                                  "last_logoff = ?, " +
+                                                                  "profile_url = ?, " +
+                                                                  "avatar = ?," +
+                                                                  "avatar_medium = ?, " +
+                                                                  "avatar_full = ?, " +
+                                                                  "persona_state = ?, " +
+                                                                  "primary_clan_id = ?, " +
+                                                                  "time_created = ?, " +
+                                                                  "persona_state_flags = ? " +
+                                                  " where account_id = ?");
 
             prep.setString(1, personaName);
-            prep.setInt(2, id32);
+            prep.setInt(2, communityVisibilityState);
+            prep.setInt(3, profileState);
+            prep.setInt(4, lastLogoff);
+            prep.setString(5, profileurl);
+            prep.setString(6, avatar);
+            prep.setString(7, avatarmedium);
+            prep.setString(8, avatarfull);
+            prep.setInt(9, personastate);
+            prep.setString(10, primaryclanid);
+            prep.setInt(11, timecreated);
+            prep.setInt(12, personastateflags);
+            prep.setInt(13, id32);
 
             prep.execute();
         } catch (SQLException e) {

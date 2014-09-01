@@ -19,6 +19,7 @@ public class TestDrive {
     private static Properties prop;
 
     public static void main(String[] args) {
+
         testGrabber();
     }
 
@@ -31,9 +32,10 @@ public class TestDrive {
         worker.setDomainName(prop.getProperty(DOMAIN));
         worker.setMainSteamId(Integer.valueOf(prop.getProperty(STEAMID_32)));
 
-     //   worker.saveAllHeroes();
-        worker.updatePlayersNames();
-      //  worker.saveAllMatchesByHero();
+        //   worker.saveAllHeroes();
+        worker.saveAllMatchesByHero();
+        worker.updatePlayersInfo();
+
     }
 
     private static void loadProperties() {
