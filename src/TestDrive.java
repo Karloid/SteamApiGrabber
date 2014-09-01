@@ -32,8 +32,8 @@ public class TestDrive {
         worker.setMainSteamId(Integer.valueOf(prop.getProperty(STEAMID_32)));
 
      //   worker.saveAllHeroes();
-
-        worker.saveAllMatchesByHero();
+        worker.updatePlayersNames();
+      //  worker.saveAllMatchesByHero();
     }
 
     private static void loadProperties() {

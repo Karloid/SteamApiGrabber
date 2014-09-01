@@ -77,6 +77,36 @@ public class SQLiteModel implements Model {
         }
     }
 
+    @Override
+    public List<Player> getAllPlayers() {
+        List<Player> players = new ArrayList<Player>();
+        try {
+            Statement stat = connection.createStatement();
+            ResultSet rs = stat.executeQuery("select account_id, persona_name from players;");
+            while (rs.next()) {
+                players.add(new Player(rs.getInt(1), rs.getString(2)));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return players;
+    }
+
+    @Override
+    public void updatePlayer(int id32, int communityVisibilityState, int profileState, String personaName, int lastLogoff, String profileurl, String avatar, String avatarmedium, String avatarfull, int personastate, String primaryclanid, int timecreated, int personastateflags) {
+        PreparedStatement prep = null;
+        try {
+            prep = connection.prepareStatement("update players set persona_name = ? where account_id = ?");
+
+            prep.setString(1, personaName);
+            prep.setInt(2, id32);
+
+            prep.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void saveMatchPlayers(int matchId, ArrayList<Map<String, Object>> players) throws SQLException {
         for (Map<String, Object> playerInMatch : players) {
             PreparedStatement prep = connection.prepareStatement("insert into players_in_matches (match_id, account_id, player_slot, hero_id) values (?, ?, ?, ?);");

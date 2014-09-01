@@ -35,6 +35,24 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
     public static final String LANGUAGE = "language";
     private static final int OK_STATUS_HEROES = 200;
     public static final String HERO_ID = "hero_id";
+    public static final int MAX_PLAYERS_IN_DETAIL_REQUEST = 99;
+    private static final String GET_PLAYERS_SUMMARIES = "/ISteamUser/GetPlayerSummaries/v0002/";
+    public static final String STEAMIDS = "steamids";
+    public static final long MAGIC_STEAM_ID64_LONG = 76561197960265728l;
+    public static final String RESPONSE = "response";
+    public static final String STEAMID = "steamid";
+    public static final String COMMUNITYVISIBILITYSTATE = "communityvisibilitystate";
+    public static final String PROFILE_STATE = "profilestate";
+    public static final String PERSONANAME = "personaname";
+    public static final String LASTLOGOFF = "lastlogoff";
+    public static final String PROFILEURL = "profileurl";
+    public static final String AVATAR = "avatar";
+    public static final String AVATARMEDIUM = "avatarmedium";
+    public static final String AVATARFULL = "avatarfull";
+    public static final String PERSONASTATE = "personastate";
+    public static final String PRIMARYCLANID = "primaryclanid";
+    public static final String TIME_CREATED = "timecreated";
+    public static final String PERSONA_STATE_FLAGS = "personastateflags";
     private Model model;
     private String apiKey;
     private String domainName;
@@ -172,6 +190,91 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
         }
 
 
+    }
+
+    @Override
+    public void updatePlayersNames() {
+        List<Player> allPlayers = model.getAllPlayers();
+        List<Player> playersToRequest = new ArrayList<Player>();
+        for (Player player : allPlayers) {
+            if (player.getPersonaname() == null ) {
+                playersToRequest.add(player);
+                if (playersToRequest.size() > MAX_PLAYERS_IN_DETAIL_REQUEST) {
+                    updatePlayersNames(playersToRequest);
+                    playersToRequest.clear();
+                    log("All players count: " + allPlayers.size() + "; current player index: " + allPlayers.indexOf(player));
+                    sleep(INTERVAL_BETWEEN_REQUESTS);
+                }
+            }
+        }
+        if (!playersToRequest.isEmpty()) {
+            updatePlayersNames(playersToRequest);
+        }
+    }
+
+    private void updatePlayersNames(List<Player> playersToRequest) {
+        String steamIds = "";
+        for (Player player : playersToRequest) {
+            long id64 = player.getAccountId() + MAGIC_STEAM_ID64_LONG;
+            steamIds += "," + id64;
+        }
+        steamIds = steamIds.substring(1);
+        URI uri = null;
+        try {
+            uri = getPlayerDetailUri(steamIds);
+
+            HttpGet httpGet = new HttpGet(uri);
+            String result = makeRequest(httpGet);
+            log("resultRequest: " + result);
+            parseAndSavePlayersSummaries(result);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void parseAndSavePlayersSummaries(String result) {
+        Map root = (Map<String, Object>) new Gson().fromJson(result, Map.class).get(RESPONSE);
+        ArrayList<Map<String, Object>> players = (ArrayList<Map<String, Object>>) root.get(PLAYERS);
+        for (Map<String, Object> player : players) {
+            int id32 = calcSteamId32(Long.valueOf((String) player.get(STEAMID)));
+            int profileState = nvlInt(player.get(PROFILE_STATE), -1);
+            int timeCreated = nvlInt(player.get(TIME_CREATED), -1);
+            int personaStateFlags = nvlInt(player.get(PERSONA_STATE_FLAGS), -1);
+            int lastLogoff = nvlInt(player.get(LASTLOGOFF), -1);
+            model.updatePlayer(id32,
+                    anInt(player.get(COMMUNITYVISIBILITYSTATE)),
+                    profileState,
+                    (String) player.get(PERSONANAME),
+                    lastLogoff,
+                    (String) player.get(PROFILEURL),
+                    (String) player.get(AVATAR),
+                    (String) player.get(AVATARMEDIUM),
+                    (String) player.get(AVATARFULL),
+                    anInt(player.get(PERSONASTATE)),
+                    (String) (player.get(PRIMARYCLANID)),
+                    timeCreated,
+                    personaStateFlags
+            );
+        }
+    }
+
+    private int nvlInt(Object value, int altValue) {
+        return (value == null ? -1 : anInt(value));
+    }
+
+
+    private int calcSteamId32(long l) {
+        return (int) (l - MAGIC_STEAM_ID64_LONG);
+    }
+
+    private URI getPlayerDetailUri(String steamIds) throws URISyntaxException {
+        URIBuilder builder = new URIBuilder();
+        builder.setScheme("https")
+                .setHost(HOST)
+                .setPath(GET_PLAYERS_SUMMARIES)
+                .setParameter(KEY, apiKey)
+                .setParameter(STEAMIDS, steamIds);
+        return builder.build();
     }
 
     private void parseAndSaveHeroes(ArrayList<Map<String, Object>> heroesMaps) {

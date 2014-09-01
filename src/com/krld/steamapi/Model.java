@@ -15,4 +15,8 @@ public interface Model {
     List<Hero> getAllHeroes();
 
     void saveMatches(ArrayList<Map<String,Object>> matches);
+
+    List<Player> getAllPlayers();
+
+    void updatePlayer(int id32, int communityvisibilitystate, int profilestate, String personaname, int lastlogoff, String profileurl, String avatar, String avatarmedium, String avatarfull, int personastate, String primaryclanid, int timecreated, int personastateflags);
 }
