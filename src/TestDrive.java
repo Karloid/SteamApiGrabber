@@ -20,8 +20,8 @@ public class TestDrive {
 
     public static void main(String[] args) {
         // testGrabberMatchDetails();
-        testUpdatePlayersDetails();
-        // testGrabberListIds();
+        //testUpdatePlayersDetails();
+        testGrabberListIds();
         // testGrabber();
     }
 
@@ -32,20 +32,11 @@ public class TestDrive {
 
     private static void testGrabberMatchDetails() {
         SteamApiWorkerInterface worker = getSteamApiWorker();
+        worker.updateAllMatchesDetails();
     }
 
     private static void testGrabberListIds() {
-        int[] ids = new int[]{86716093,
-                68617303,
-                102862328,
-                175857873,
-                33785877,
-                98568556,
-                113864570,
-                113991627,
-                92612919,
-                90051210,
-                97329232,};
+        int[] ids = new int[]{113696708};
         SteamApiWorkerInterface worker = getSteamApiWorker();
         for (int id : ids) {
             worker.saveAllMatchesByHero(id);

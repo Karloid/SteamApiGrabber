@@ -115,6 +115,26 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
     }
 
     @Override
+    public void updateAllMatchesDetails() {
+      /*  List<Match> allMatches = model.getAllMatches();
+        for (Match player : allMatches) {
+            updateMatchDetalla
+            if (player.getPersonaname() == null) {
+                playersToRequest.add(player);
+                if (playersToRequest.size() > MAX_PLAYERS_IN_DETAIL_REQUEST) {
+                    updatePlayersNames(playersToRequest);
+                    playersToRequest.clear();
+                    log("All players count: " + allMatches.size() + "; current player index: " + allMatches.indexOf(player));
+                    sleep(INTERVAL_BETWEEN_REQUESTS);
+                }
+            }
+        }*//*
+        if (!playersToRequest.isEmpty()) {
+            updatePlayersNames(playersToRequest);
+        }*/
+    }
+
+    @Override
     public void saveAllMatchesByHero() {
         saveAllMatchesByHero(steamId32);
 

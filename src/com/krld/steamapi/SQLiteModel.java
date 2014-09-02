@@ -57,7 +57,7 @@ public class SQLiteModel implements Model {
 
     @Override
     public void saveMatches(ArrayList<Map<String, Object>> matches) {
-        log("SAVE MATHES");
+        log("SAVE MATHES... count: " + matches.size());
         for (Map<String, Object> match : matches) {
             try {
                 PreparedStatement prep = connection.prepareStatement("insert into matches (id, match_seq_num, start_time, lobby_type, radiant_team_id, dire_team_id) " +
@@ -80,6 +80,7 @@ public class SQLiteModel implements Model {
 
     @Override
     public List<Player> getAllPlayers() {
+        log("GET ALL PLAYERS");
         List<Player> players = new ArrayList<Player>();
         try {
             Statement stat = connection.createStatement();
