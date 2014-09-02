@@ -28,7 +28,7 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
     private static final String GET_HEROES = "/IEconDOTA2_570/GetHeroes/v0001/";
     public static final String KEY = "key";
     public static final String ACCOUNT_ID = "account_id";
-    public static final int INTERVAL_BETWEEN_REQUESTS = 1000;
+    public static final int INTERVAL_BETWEEN_REQUESTS = 900;
     public static final String START_AT_MATCH_ID = "start_at_match_id";
     public static final String DATE_MAX = "date_max";
     public static final String EN_US = "en_us";
@@ -53,6 +53,7 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
     public static final String PRIMARYCLANID = "primaryclanid";
     public static final String TIME_CREATED = "timecreated";
     public static final String PERSONA_STATE_FLAGS = "personastateflags";
+    public static final String NOTHING = "nothing";
     private Model model;
     private String apiKey;
     private String domainName;
@@ -79,16 +80,20 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
         log("SAVE MATHES");
         List<Hero> heroes = model.getAllHeroes();
         for (Hero hero : heroes) {
-            try {
-                int heroId = hero.getId();
-                int resultsRemaining = 1;
-                int startAtMatchId = -1;
-                while (resultsRemaining > 0) {
-                    log("make request with " + START_AT_MATCH_ID + "=" + startAtMatchId + "&" + HERO_ID + "=" + heroId);
+
+            int heroId = hero.getId();
+            int resultsRemaining = 1;
+            int startAtMatchId = -1;
+            while (resultsRemaining > 0) {
+                try {
+                    log("make request with " + START_AT_MATCH_ID + "=" + startAtMatchId + "&" + ACCOUNT_ID + "=" + id + "&" + HERO_ID + "=" + heroId);
                     URI uri = getMatchHistoryUri(startAtMatchId, heroId, id);
                     HttpGet httpGet = new HttpGet(uri);
                     String result = makeRequest(httpGet);
-                    log("resultRequest: " + result);
+                   // log("resultRequest: " + result);
+                    if (result.equals(NOTHING)) {
+                        throw new Exception("Result is nothing");
+                    }
                     Map root = (Map<String, Object>) new Gson().fromJson(result, Map.class).get(RESULT);
                     if (anInt(root.get(STATUS)) != OK_STATUS) {
                         throw new Exception("Incorrect response status: " + anInt(root.get(STATUS)));
@@ -101,10 +106,11 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
                         startAtMatchId = anInt(matches.get(matches.size() - 1).get(JsonResponseFormat.MATCH_ID));
                     }
                     sleep(INTERVAL_BETWEEN_REQUESTS);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+
         }
     }
 
@@ -162,16 +168,16 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
                 resposneAsString = IOUtils.toString(inputStream);
                 return resposneAsString;
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
                 inputStream.close();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return "nothing";
+        return NOTHING;
     }
 
     @Override
@@ -186,7 +192,10 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
             URI uri = getHeroesUri();
             HttpGet httpGet = new HttpGet(uri);
             String result = makeRequest(httpGet);
-            log("resultRequest: " + result);
+            //log("resultRequest: " + result);
+            if (result.equals(NOTHING)) {
+                throw new Exception("Result is nothing!");
+            }
             Map root = (Map<String, Object>) new Gson().fromJson(result, Map.class).get(RESULT);
             if (anInt(root.get(STATUS)) != OK_STATUS_HEROES) {
                 throw new Exception("Incorrect response status: " + anInt(root.get(STATUS)));
@@ -232,7 +241,7 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
 
             HttpGet httpGet = new HttpGet(uri);
             String result = makeRequest(httpGet);
-            log("resultRequest: " + result);
+            //log("resultRequest: " + result);
             parseAndSavePlayersSummaries(result);
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -240,6 +249,9 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
     }
 
     private void parseAndSavePlayersSummaries(String result) {
+        if (result.equals(NOTHING)) {
+            return;
+        }
         Map root = (Map<String, Object>) new Gson().fromJson(result, Map.class).get(RESPONSE);
         ArrayList<Map<String, Object>> players = (ArrayList<Map<String, Object>>) root.get(PLAYERS);
         for (Map<String, Object> player : players) {

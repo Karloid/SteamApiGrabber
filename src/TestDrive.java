@@ -19,8 +19,19 @@ public class TestDrive {
     private static Properties prop;
 
     public static void main(String[] args) {
-        testGrabberListIds();
+        // testGrabberMatchDetails();
+        testUpdatePlayersDetails();
+        // testGrabberListIds();
         // testGrabber();
+    }
+
+    private static void testUpdatePlayersDetails() {
+        SteamApiWorkerInterface worker = getSteamApiWorker();
+        worker.updatePlayersInfo();
+    }
+
+    private static void testGrabberMatchDetails() {
+        SteamApiWorkerInterface worker = getSteamApiWorker();
     }
 
     private static void testGrabberListIds() {

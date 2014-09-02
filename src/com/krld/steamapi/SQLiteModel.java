@@ -100,18 +100,18 @@ public class SQLiteModel implements Model {
         PreparedStatement prep = null;
         try {
             prep = connection.prepareStatement("update players set persona_name = ?, " +
-                                                                  "community_visibility_state = ?," +
-                                                                  "profile_state = ?, " +
-                                                                  "last_logoff = ?, " +
-                                                                  "profile_url = ?, " +
-                                                                  "avatar = ?," +
-                                                                  "avatar_medium = ?, " +
-                                                                  "avatar_full = ?, " +
-                                                                  "persona_state = ?, " +
-                                                                  "primary_clan_id = ?, " +
-                                                                  "time_created = ?, " +
-                                                                  "persona_state_flags = ? " +
-                                                  " where account_id = ?");
+                    "community_visibility_state = ?," +
+                    "profile_state = ?, " +
+                    "last_logoff = ?, " +
+                    "profile_url = ?, " +
+                    "avatar = ?," +
+                    "avatar_medium = ?, " +
+                    "avatar_full = ?, " +
+                    "persona_state = ?, " +
+                    "primary_clan_id = ?, " +
+                    "time_created = ?, " +
+                    "persona_state_flags = ? " +
+                    " where account_id = ?");
 
             prep.setString(1, personaName);
             prep.setInt(2, communityVisibilityState);
@@ -136,16 +136,17 @@ public class SQLiteModel implements Model {
     private void saveMatchPlayers(int matchId, ArrayList<Map<String, Object>> players) throws SQLException {
         for (Map<String, Object> playerInMatch : players) {
             PreparedStatement prep = connection.prepareStatement("insert into players_in_matches (match_id, account_id, player_slot, hero_id) select ?, ?, ?, ? " +
-                                                                                                          " where not exists (select 1 from players_in_matches " +
-                                                                                                                                "where match_id = ? and account_id = ? and player_slot = ?);");
+                    " where not exists (select 1 from players_in_matches " +
+                    "where match_id = ? and account_id = ? and player_slot = ?);");
 
-            savePlayer(anInt(playerInMatch.get(JsonResponseFormat.ACCOUNT_ID)));
+            int accountId = Utils.nvlInt(playerInMatch.get(JsonResponseFormat.ACCOUNT_ID), -1);
+            savePlayer(accountId);
             prep.setInt(1, matchId);
-            prep.setInt(2, anInt(playerInMatch.get(JsonResponseFormat.ACCOUNT_ID)));
+            prep.setInt(2, accountId);
             prep.setInt(3, anInt(playerInMatch.get(JsonResponseFormat.PLAYER_SLOT)));
             prep.setInt(4, anInt(playerInMatch.get(JsonResponseFormat.HERO_ID)));
             prep.setInt(5, matchId);
-            prep.setInt(6, anInt(playerInMatch.get(JsonResponseFormat.ACCOUNT_ID)));
+            prep.setInt(6, accountId);
             prep.setInt(7, anInt(playerInMatch.get(JsonResponseFormat.PLAYER_SLOT)));
             prep.execute();
         }
@@ -153,7 +154,7 @@ public class SQLiteModel implements Model {
 
     private void savePlayer(int accountId) throws SQLException {
         PreparedStatement prep = connection.prepareStatement("insert into players (account_id) select ? where not exists " +
-                                                                                    " (select 1 from players where account_id = ?);");
+                " (select 1 from players where account_id = ?);");
         prep.setInt(1, accountId);
         prep.setInt(2, accountId);
         prep.execute();
