@@ -28,7 +28,7 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
     private static final String GET_HEROES = "/IEconDOTA2_570/GetHeroes/v0001/";
     public static final String KEY = "key";
     public static final String ACCOUNT_ID = "account_id";
-    public static final int INTERVAL_BETWEEN_REQUESTS = 1000;
+    public static final int INTERVAL_BETWEEN_REQUESTS = 800;
     public static final String START_AT_MATCH_ID = "start_at_match_id";
     public static final String DATE_MAX = "date_max";
     public static final String EN_US = "en_us";
