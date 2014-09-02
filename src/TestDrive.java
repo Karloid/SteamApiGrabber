@@ -19,11 +19,39 @@ public class TestDrive {
     private static Properties prop;
 
     public static void main(String[] args) {
+        testGrabberListIds();
+        // testGrabber();
+    }
 
-        testGrabber();
+    private static void testGrabberListIds() {
+        int[] ids = new int[]{86716093,
+                68617303,
+                102862328,
+                175857873,
+                33785877,
+                98568556,
+                113864570,
+                113991627,
+                92612919,
+                90051210,
+                97329232,};
+        SteamApiWorkerInterface worker = getSteamApiWorker();
+        for (int id : ids) {
+            worker.saveAllMatchesByHero(id);
+        }
+        worker.updatePlayersInfo();
     }
 
     private static void testGrabber() {
+        SteamApiWorkerInterface worker = getSteamApiWorker();
+
+        //   worker.saveAllHeroes();
+        worker.saveAllMatchesByHero();
+        worker.updatePlayersInfo();
+
+    }
+
+    private static SteamApiWorkerInterface getSteamApiWorker() {
         loadProperties();
         SteamApiWorkerInterface worker = new SteamApiWorker();
         Model model = new SQLiteModel(DB_PATH);
@@ -31,11 +59,7 @@ public class TestDrive {
         worker.setApiKey(prop.getProperty(KEY));
         worker.setDomainName(prop.getProperty(DOMAIN));
         worker.setMainSteamId(Integer.valueOf(prop.getProperty(STEAMID_32)));
-
-        //   worker.saveAllHeroes();
-        worker.saveAllMatchesByHero();
-        worker.updatePlayersInfo();
-
+        return worker;
     }
 
     private static void loadProperties() {

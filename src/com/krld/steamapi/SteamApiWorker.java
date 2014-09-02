@@ -28,7 +28,7 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
     private static final String GET_HEROES = "/IEconDOTA2_570/GetHeroes/v0001/";
     public static final String KEY = "key";
     public static final String ACCOUNT_ID = "account_id";
-    public static final int INTERVAL_BETWEEN_REQUESTS = 800;
+    public static final int INTERVAL_BETWEEN_REQUESTS = 1000;
     public static final String START_AT_MATCH_ID = "start_at_match_id";
     public static final String DATE_MAX = "date_max";
     public static final String EN_US = "en_us";
@@ -75,7 +75,7 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
     }
 
     @Override
-    public void saveAllMatchesByHero() {
+    public void saveAllMatchesByHero(int id) {
         log("SAVE MATHES");
         List<Hero> heroes = model.getAllHeroes();
         for (Hero hero : heroes) {
@@ -85,7 +85,7 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
                 int startAtMatchId = -1;
                 while (resultsRemaining > 0) {
                     log("make request with " + START_AT_MATCH_ID + "=" + startAtMatchId + "&" + HERO_ID + "=" + heroId);
-                    URI uri = getMatchHistoryUri(startAtMatchId, heroId);
+                    URI uri = getMatchHistoryUri(startAtMatchId, heroId, id);
                     HttpGet httpGet = new HttpGet(uri);
                     String result = makeRequest(httpGet);
                     log("resultRequest: " + result);
@@ -106,6 +106,11 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void saveAllMatchesByHero() {
+        saveAllMatchesByHero(steamId32);
 
     }
 
@@ -129,13 +134,13 @@ public class SteamApiWorker implements SteamApiWorkerInterface {
         return ((Double) value).intValue();
     }
 
-    private URI getMatchHistoryUri(int startAtMatchId, int heroId) throws URISyntaxException {
+    private URI getMatchHistoryUri(int startAtMatchId, int heroId, int id32) throws URISyntaxException {
         URIBuilder builder = new URIBuilder();
         builder.setScheme("https")
                 .setHost(HOST)
                 .setPath(GET_MATCH_HISTORY)
                 .setParameter(KEY, apiKey)
-                .setParameter(ACCOUNT_ID, steamId32 + "");
+                .setParameter(ACCOUNT_ID, id32 + "");
         if (startAtMatchId != -1) {
             builder.setParameter(START_AT_MATCH_ID, startAtMatchId + "");
         }

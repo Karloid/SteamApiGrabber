@@ -61,13 +61,14 @@ public class SQLiteModel implements Model {
         for (Map<String, Object> match : matches) {
             try {
                 PreparedStatement prep = connection.prepareStatement("insert into matches (id, match_seq_num, start_time, lobby_type, radiant_team_id, dire_team_id) " +
-                        " values (?, ?, ?, ?, ?, ?);");
+                        " select ?, ?, ?, ?, ?, ? where not exists (select 1 from matches where id = ?);");
                 prep.setInt(1, anInt(match.get(JsonResponseFormat.MATCH_ID))); // insert into ID field
                 prep.setInt(2, anInt(match.get(JsonResponseFormat.MATCH_SEQ_NUM)));
                 prep.setInt(3, anInt(match.get(JsonResponseFormat.START_TIME)));
                 prep.setInt(4, anInt(match.get(JsonResponseFormat.LOBBY_TYPE)));
                 prep.setInt(5, anInt(match.get(JsonResponseFormat.RADIANT_TEAM_ID)));
                 prep.setInt(6, anInt(match.get(JsonResponseFormat.DIRE_TEAM_ID)));
+                prep.setInt(7, anInt(match.get(JsonResponseFormat.MATCH_ID)));
                 prep.execute();
                 saveMatchPlayers(anInt(match.get(JsonResponseFormat.MATCH_ID)), (ArrayList<Map<String, Object>>) match.get(JsonResponseFormat.PLAYERS));
             } catch (SQLException e) {
@@ -134,19 +135,27 @@ public class SQLiteModel implements Model {
 
     private void saveMatchPlayers(int matchId, ArrayList<Map<String, Object>> players) throws SQLException {
         for (Map<String, Object> playerInMatch : players) {
-            PreparedStatement prep = connection.prepareStatement("insert into players_in_matches (match_id, account_id, player_slot, hero_id) values (?, ?, ?, ?);");
+            PreparedStatement prep = connection.prepareStatement("insert into players_in_matches (match_id, account_id, player_slot, hero_id) select ?, ?, ?, ? " +
+                                                                                                          " where not exists (select 1 from players_in_matches " +
+                                                                                                                                "where match_id = ? and account_id = ? and player_slot = ?);");
+
             savePlayer(anInt(playerInMatch.get(JsonResponseFormat.ACCOUNT_ID)));
             prep.setInt(1, matchId);
             prep.setInt(2, anInt(playerInMatch.get(JsonResponseFormat.ACCOUNT_ID)));
             prep.setInt(3, anInt(playerInMatch.get(JsonResponseFormat.PLAYER_SLOT)));
             prep.setInt(4, anInt(playerInMatch.get(JsonResponseFormat.HERO_ID)));
+            prep.setInt(5, matchId);
+            prep.setInt(6, anInt(playerInMatch.get(JsonResponseFormat.ACCOUNT_ID)));
+            prep.setInt(7, anInt(playerInMatch.get(JsonResponseFormat.PLAYER_SLOT)));
             prep.execute();
         }
     }
 
     private void savePlayer(int accountId) throws SQLException {
-        PreparedStatement prep = connection.prepareStatement("insert into players (account_id) values (?);");
+        PreparedStatement prep = connection.prepareStatement("insert into players (account_id) select ? where not exists " +
+                                                                                    " (select 1 from players where account_id = ?);");
         prep.setInt(1, accountId);
+        prep.setInt(2, accountId);
         prep.execute();
     }
 

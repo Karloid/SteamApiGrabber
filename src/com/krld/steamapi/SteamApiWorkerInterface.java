@@ -17,4 +17,6 @@ public interface SteamApiWorkerInterface {
     void saveAllHeroes();
 
     void updatePlayersInfo();
+
+    void saveAllMatchesByHero(int id);
 }
