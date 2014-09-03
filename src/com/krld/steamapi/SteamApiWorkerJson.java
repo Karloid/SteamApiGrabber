@@ -125,7 +125,6 @@ public class SteamApiWorkerJson implements SteamApiWorker {
             log("All players count: " + allMatches.size() + "; current match index: " + allMatches.indexOf(match));
             updateMatchDetails(match.getId());
             sleep(INTERVAL_BETWEEN_REQUESTS);
-            break;
         }
     }
 
