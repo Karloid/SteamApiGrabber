@@ -1,7 +1,7 @@
 import com.krld.steamapi.SQLiteModel;
-import com.krld.steamapi.Model;
+import com.krld.steamapi.model.Model;
 import com.krld.steamapi.SteamApiWorker;
-import com.krld.steamapi.SteamApiWorkerInterface;
+import com.krld.steamapi.SteamApiWorkerJson;
 
 import java.io.File;
 import java.io.FileReader;
@@ -19,25 +19,25 @@ public class TestDrive {
     private static Properties prop;
 
     public static void main(String[] args) {
-        // testGrabberMatchDetails();
+         testGrabberMatchDetails();
         //testUpdatePlayersDetails();
-        testGrabberListIds();
+       // testGrabberListIds();
         // testGrabber();
     }
 
     private static void testUpdatePlayersDetails() {
-        SteamApiWorkerInterface worker = getSteamApiWorker();
+        SteamApiWorker worker = getSteamApiWorker();
         worker.updatePlayersInfo();
     }
 
     private static void testGrabberMatchDetails() {
-        SteamApiWorkerInterface worker = getSteamApiWorker();
+        SteamApiWorker worker = getSteamApiWorker();
         worker.updateAllMatchesDetails();
     }
 
     private static void testGrabberListIds() {
         int[] ids = new int[]{113696708};
-        SteamApiWorkerInterface worker = getSteamApiWorker();
+        SteamApiWorker worker = getSteamApiWorker();
         for (int id : ids) {
             worker.saveAllMatchesByHero(id);
         }
@@ -45,7 +45,7 @@ public class TestDrive {
     }
 
     private static void testGrabber() {
-        SteamApiWorkerInterface worker = getSteamApiWorker();
+        SteamApiWorker worker = getSteamApiWorker();
 
         //   worker.saveAllHeroes();
         worker.saveAllMatchesByHero();
@@ -53,9 +53,9 @@ public class TestDrive {
 
     }
 
-    private static SteamApiWorkerInterface getSteamApiWorker() {
+    private static SteamApiWorker getSteamApiWorker() {
         loadProperties();
-        SteamApiWorkerInterface worker = new SteamApiWorker();
+        SteamApiWorker worker = new SteamApiWorkerJson();
         Model model = new SQLiteModel(DB_PATH);
         worker.setModel(model);
         worker.setApiKey(prop.getProperty(KEY));

@@ -11,4 +11,8 @@ public class Utils {
     public static int anInt(Object value) {
         return ((Double) value).intValue();
     }
+
+    public static long anLong(Object value) {
+        return ((Double) value).longValue();
+    }
 }
