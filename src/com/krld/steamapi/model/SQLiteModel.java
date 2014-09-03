@@ -1,4 +1,4 @@
-package com.krld.steamapi;
+package com.krld.steamapi.model;
 
 import com.krld.steamapi.jsonkeys.JsonResponseFormat;
 import com.krld.steamapi.model.*;

@@ -1,4 +1,4 @@
-import com.krld.steamapi.SQLiteModel;
+import com.krld.steamapi.model.SQLiteModel;
 import com.krld.steamapi.model.Model;
 import com.krld.steamapi.SteamApiWorker;
 import com.krld.steamapi.SteamApiWorkerJson;
