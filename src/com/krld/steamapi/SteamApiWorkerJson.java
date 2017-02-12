@@ -134,7 +134,7 @@ public class SteamApiWorkerJson implements SteamApiWorker {
             uri = getMatchDetailsUri(id);
             HttpGet httpGet = new HttpGet(uri);
             String result = makeRequest(httpGet);
-            logV("resultRequest: " + result);
+            //logV("resultRequest: " + result);
             if (result.equals(NOTHING)) {
                 throw new Exception("Result is nothing");
             }

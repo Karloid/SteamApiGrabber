@@ -19,10 +19,12 @@ public class TestDrive {
     private static Properties prop;
 
     public static void main(String[] args) {
-         testGrabberMatchDetails();
-        //testUpdatePlayersDetails();
-       // testGrabberListIds();
-        // testGrabber();
+
+        testUpdatePlayersDetails();
+        testGrabberListIds();
+        testGrabber();
+
+        testGrabberMatchDetails();
     }
 
     private static void testUpdatePlayersDetails() {
@@ -36,7 +38,7 @@ public class TestDrive {
     }
 
     private static void testGrabberListIds() {
-        int[] ids = new int[]{113696708};
+        int[] ids = new int[]{194097398, 68617303, 86716093, 88460580};
         SteamApiWorker worker = getSteamApiWorker();
         for (int id : ids) {
             worker.saveAllMatchesByHero(id);
@@ -47,7 +49,7 @@ public class TestDrive {
     private static void testGrabber() {
         SteamApiWorker worker = getSteamApiWorker();
 
-        //   worker.saveAllHeroes();
+        worker.saveAllHeroes();
         worker.saveAllMatchesByHero();
         worker.updatePlayersInfo();
 

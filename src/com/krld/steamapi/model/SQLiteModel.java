@@ -1,7 +1,6 @@
 package com.krld.steamapi.model;
 
 import com.krld.steamapi.jsonkeys.JsonResponseFormat;
-import com.krld.steamapi.model.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.sql.*;
@@ -9,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.krld.steamapi.Utils.*;
+import static com.krld.steamapi.Utils.nvlInt;
 import static com.krld.steamapi.jsonkeys.JsonResponseFormat.*;
 
 /**
@@ -22,6 +21,7 @@ public class SQLiteModel implements Model {
         try {
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+            //connection.setAutoCommit(false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -35,7 +35,7 @@ public class SQLiteModel implements Model {
             prep.setInt(1, id);
             prep.setString(2, name);
             prep.setString(3, localizedName);
-            prep.execute();
+            execute(prep);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -76,7 +76,7 @@ public class SQLiteModel implements Model {
                 prep.setInt(5, anInt(match.get(RADIANT_TEAM_ID)));
                 prep.setInt(6, anInt(match.get(DIRE_TEAM_ID)));
                 prep.setInt(7, anInt(match.get(MATCH_ID)));
-                prep.execute();
+                execute(prep);
                 saveMatchPlayers(anInt(match.get(MATCH_ID)), (ArrayList<Map<String, Object>>) match.get(PLAYERS));
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -134,7 +134,7 @@ public class SQLiteModel implements Model {
             prep.setInt(11, timecreated);
             prep.setInt(12, personastateflags);
             prep.setInt(13, id32);
-            prep.execute();
+            execute(prep);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -216,7 +216,7 @@ public class SQLiteModel implements Model {
             prep.setInt(14, match.getRadiantCaptain());
             prep.setInt(15, match.getDireCaptain());
             prep.setInt(16, match.getId());
-            prep.execute();
+            execute(prep);
             log("prep update count: " + prep.getUpdateCount());
             updatePlayersInMatch(match.getPlayersInMatch());
         } catch (SQLException e) {
@@ -277,7 +277,7 @@ public class SQLiteModel implements Model {
                 prep.setInt(21, playerInMatch.getAccountId());
                 prep.setInt(22, playerInMatch.getPlayerSlot());
                 prep.setInt(23, playerInMatch.getHeroId());
-                prep.execute();
+                execute(prep);
                 log("prep update count: " + prep.getUpdateCount());
                 updateAbilityesPlayersInMatch(playerInMatch);
             } catch (SQLException e) {
@@ -301,36 +301,45 @@ public class SQLiteModel implements Model {
             prep.setInt(2, playerInMatch.getAccountId());
             prep.setInt(3, playerInMatch.getPlayerSlot());
             prep.setInt(4, playerInMatch.getHeroId());
-            prep.execute();
+            execute(prep);
             log("delete abilities: " + prep.getUpdateCount());
-            for (Map<String, Object> abilityMap : playerInMatch.getAbilityUpgrades()) {
-                prep = connection.prepareStatement("insert into ability_upgrades (player_in_match_id, " +
-                        "ability_id, " +
-                        "time, " +
-                        "level) " +
-                        "select (select id from players_in_matches " +
-                        "where match_id = ? " +
-                        "and account_id = ? " +
-                        "and player_slot = ? " +
-                        "and hero_id = ? " +
-                        ")," +
-                        "?," +        //5
-                        "?," +
-                        "?" +
-                        ";");
-                prep.setInt(1, playerInMatch.getMatchId());
-                prep.setInt(2, playerInMatch.getAccountId());
-                prep.setInt(3, playerInMatch.getPlayerSlot());
-                prep.setInt(4, playerInMatch.getHeroId());
-                prep.setInt(5, nvlInt(abilityMap.get(JsonResponseFormat.ABILITY), -1));
-                prep.setInt(6, nvlInt(abilityMap.get(JsonResponseFormat.TIME), -1));
-                prep.setInt(7, nvlInt(abilityMap.get(JsonResponseFormat.LEVEL), -1));
-                prep.execute();
-                log("insert ability: " + prep.getUpdateCount());
+            if (playerInMatch.getAbilityUpgrades() != null) {
+                for (Map<String, Object> abilityMap : playerInMatch.getAbilityUpgrades()) {
+                    prep = connection.prepareStatement("insert into ability_upgrades (player_in_match_id, " +
+                            "ability_id, " +
+                            "time, " +
+                            "level) " +
+                            "select (select id from players_in_matches " +
+                            "where match_id = ? " +
+                            "and account_id = ? " +
+                            "and player_slot = ? " +
+                            "and hero_id = ? " +
+                            ")," +
+                            "?," +        //5
+                            "?," +
+                            "?" +
+                            ";");
+                    prep.setInt(1, playerInMatch.getMatchId());
+                    prep.setInt(2, playerInMatch.getAccountId());
+                    prep.setInt(3, playerInMatch.getPlayerSlot());
+                    prep.setInt(4, playerInMatch.getHeroId());
+                    prep.setInt(5, nvlInt(abilityMap.get(JsonResponseFormat.ABILITY), -1));
+                    prep.setInt(6, nvlInt(abilityMap.get(JsonResponseFormat.TIME), -1));
+                    prep.setInt(7, nvlInt(abilityMap.get(JsonResponseFormat.LEVEL), -1));
+                    execute(prep);
+                    log("insert ability: " + prep.getUpdateCount());
+                }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void execute(PreparedStatement prep) throws SQLException {
+        prep.execute();
+        if (Math.random() < 0.05) {
+            //connection.commit();
         }
     }
 
@@ -373,7 +382,7 @@ public class SQLiteModel implements Model {
             prep.setInt(5, matchId);
             prep.setInt(6, accountId);
             prep.setInt(7, anInt(playerInMatch.get(PLAYER_SLOT)));
-            prep.execute();
+            execute(prep);
         }
     }
 
@@ -382,7 +391,7 @@ public class SQLiteModel implements Model {
                 " (select 1 from players where account_id = ?);");
         prep.setInt(1, accountId);
         prep.setInt(2, accountId);
-        prep.execute();
+        execute(prep);
     }
 
     private void log(String s) {
